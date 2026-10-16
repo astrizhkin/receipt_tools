@@ -1,0 +1,23 @@
+# secrets — never commit
+.env
+app/android/key.properties
+
+# machine-specific / IDE
+app/android/local.properties
+*.iml
+.idea/
+
+# build output & caches
+app/build/
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/android/.gradle/
+app/android/app/.cxx/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# runtime data: receipt photos, run artifacts, release APKs
+artifacts/

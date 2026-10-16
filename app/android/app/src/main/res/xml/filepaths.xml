@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- the update APK is staged in the app cache dir (cache-path);
+         files-path + root-path are safety nets so a path_provider location
+         quirk can never break the installer again. Provider is not exported
+         and the installer only gets a single per-URI read grant. -->
+    <cache-path name="apk_cache" path="." />
+    <files-path name="apk_files" path="." />
+    <root-path name="apk_root" path="." />
+</paths>

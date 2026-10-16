@@ -1,0 +1,54 @@
+# All secrets/hosts live in .env (gitignored; see .env.example).
+# docker compose interpolates ${VAR} from .env automatically.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${PH_DB_USER}
+      POSTGRES_PASSWORD: ${PH_DB_PASSWORD}
+      POSTGRES_DB: ${PH_DB_NAME}
+    volumes:
+      - ${PH_HOST_DIR}/db/init:/docker-entrypoint-initdb.d:ro
+      - ph_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PH_DB_USER} -d ${PH_DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  pipeline:
+    build:
+      context: ./pipeline
+      target: base
+    environment:
+      PH_DB_DSN: postgresql://${PH_DB_USER}:${PH_DB_PASSWORD}@postgres:5432/${PH_DB_NAME}
+      PH_ARTIFACTS_DIR: /artifacts
+      PH_INIT_DIR: /docker-entrypoint-initdb.d
+      # LLM endpoints (config.py env overrides; pipeline.yaml holds no hosts)
+      PH_VL_BASE_URL: ${PH_VL_BASE_URL}
+      PH_VL_MODEL: ${PH_VL_MODEL}
+      PH_TEXT_BASE_URL: ${PH_TEXT_BASE_URL}
+      PH_TEXT_MODEL: ${PH_TEXT_MODEL}
+    volumes:
+      - ${PH_HOST_DIR}/artifacts:/artifacts
+      - ${PH_HOST_DIR}/db/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    image: nginx:1.27-alpine
+    volumes:
+      - ${PH_HOST_DIR}/app/build/web:/usr/share/nginx/html:ro
+      - ${PH_HOST_DIR}/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8090:80"
+    depends_on:
+      - pipeline
+    restart: unless-stopped
+
+volumes:
+  ph_pgdata:

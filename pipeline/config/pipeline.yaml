@@ -1,0 +1,105 @@
+# price_hunter pipeline config.
+# Env overrides applied after load (see src/phunter/config.py):
+#   PH_VL_BASE_URL, PH_VL_MODEL, PH_TEXT_BASE_URL, PH_TEXT_MODEL,
+#   PH_DB_DSN, PH_ARTIFACTS_DIR
+
+# Endpoints (base_url/model) come from the environment — see .env /
+# docker-compose.yaml (PH_VL_*, PH_TEXT_*); no hosts in this file.
+vl:
+  temperature: 0.0
+  max_tokens: 16000  # llama.cpp n_ctx 262144; 22-item receipts need >8000
+  disable_thinking: true  # thinking traces otherwise blow past max_tokens
+  timeout_s: 300
+  retries: 2
+
+text:
+  temperature: 0.0
+  max_tokens: 4000
+  timeout_s: 180
+  retries: 2
+  disable_thinking: true
+  use_tools: true
+
+# LLM prompts (single source of truth — no code defaults).
+# structure_user must contain the {ocr_text} placeholder.
+prompts:
+  ocr_system: |
+    You are an expert in OCR and document digitization.
+
+    TASK: Return the whole document text.
+
+    OUTPUT FORMAT:
+    Whole document text in Markdown format.
+
+    IMPORTANT:
+    - Document may contain handwritten text.
+    - Document is on Russian language.
+    - Carefully analyze the layout of the document, check if there are tables: rows and columns.
+    - The document is a cash register receipt, which usually contains a table with goods or services, price, quantity, cost, tax information, totals, totals with tax.
+    - Carefully format tables, render them as Markdown tables. Preserve original table structure.
+    - Do not invent information. If there is no information or confidence is poor — leave it blank.
+  ocr_user: Analyze the attached photo of a cash register receipt. Return the whole document text in Markdown format.
+  structure_system: |
+    You convert OCR output (Markdown) of a Russian cash register receipt into a strict JSON object.
+
+    OUTPUT FORMAT (strict JSON object, nothing outside it):
+    {
+      "store_name": string|null,
+      "store_address": string|null,
+      "inn": string|null,
+      "receipt_number": string|null,
+      "date": "YYYY-MM-DD"|null,
+      "time": "HH:MM:SS"|null,
+      "items": [
+        {"name": string, "qty": number|null, "unit": string|null,
+         "price": number|null, "sum": number|null,
+         "discount": number|null, "tax": string|null}
+      ],
+      "subtotal": number|null,
+      "discount_total": number|null,
+      "tax_total": number|null,
+      "total": number|null,
+      "payment_method": string|null,
+      "fiscal_document_number": string|null,
+      "fd_number": string|null
+    }
+
+    RULES:
+    - Money and quantities as JSON numbers with a dot decimal separator (1234.5).
+    - Keep item names in the original language (Russian).
+    - Use null for anything not present or uncertain. Do not invent data.
+    - "items" must contain every goods/services row of the receipt table.
+
+    DISCOUNTS (receipts often print a discount, e.g. "Скидка", under each line):
+    - "price"/"sum" are the PRINTED line amounts exactly as shown (qty x price =
+      sum). On most receipts that printed amount is ALREADY discounted - the
+      "Скидка" line only shows how much was taken off. Never add or subtract it.
+    - "discount" is that line's printed discount amount; null when the line has
+      no discount.
+    - "total" is the final amount printed on the receipt (ИТОГ/ИТОГО/К ОПЛАТЕ).
+      Do NOT subtract the discount total from it.
+    - "discount_total" is the printed total discount.
+    - "subtotal" is the printed pre-discount total ONLY if the receipt shows one
+      (ПОДИТОГ, "ЦЕНА ДО СКИДКИ"); otherwise null. ИТОГ is usually the FINAL
+      amount, not a pre-discount subtotal.
+    - The validation tool checks the arithmetic; report printed numbers
+      faithfully instead of hand-adjusting fields.
+
+    VALIDATION (required):
+    - Before returning the final answer, call the validate_json tool with your
+      complete JSON as the "candidate" argument.
+    - If it reports errors, fix the JSON and call validate_json again.
+    - Repeat until validation passes, then return the final JSON object.
+  structure_user: |
+    OCR Markdown of the receipt:
+
+    {ocr_text}
+
+resize:
+  max_pixels: 3000000
+  jpeg_quality: 90
+
+# db.dsn comes from the environment (PH_DB_DSN, set by docker-compose).
+db: {}
+
+artifacts_dir: /artifacts

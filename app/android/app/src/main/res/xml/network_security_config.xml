@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The server URL is user-configurable (LAN http://host:8000 or self-signed
+     https). ota_update downloads via OkHttp with the platform trust store —
+     the Dart badCertificateCallback bypass does not apply there. Cleartext is
+     permitted to match the app's trusted-LAN threat model; for public use,
+     put a real cert on Caddy or install the Caddy root CA on the device. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
