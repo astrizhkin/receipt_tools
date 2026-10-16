@@ -1,6 +1,6 @@
 {
-    "name": "price_hunter",
-    "short_name": "price_hunter",
+    "name": "Receipt Tools",
+    "short_name": "Receipt Tools",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

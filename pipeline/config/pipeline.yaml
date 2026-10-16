@@ -1,4 +1,4 @@
-# price_hunter pipeline config.
+# receipt_tools pipeline config.
 # Env overrides applied after load (see src/phunter/config.py):
 #   PH_VL_BASE_URL, PH_VL_MODEL, PH_TEXT_BASE_URL, PH_TEXT_MODEL,
 #   PH_DB_DSN, PH_ARTIFACTS_DIR

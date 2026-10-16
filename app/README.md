@@ -1,4 +1,4 @@
-# price_hunter
+# Receipt Tools
 
 A new Flutter project.
 

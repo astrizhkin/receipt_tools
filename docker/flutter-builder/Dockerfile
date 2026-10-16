@@ -1,4 +1,4 @@
-# Flutter + Android SDK build container for the price_hunter app.
+# Flutter + Android SDK build container for the receipt_tools app.
 # The app source is bind-mounted at /src; build output lands in /src/build
 # (so the APK is visible on the host). Gradle/pub caches are named volumes.
 FROM ubuntu:24.04

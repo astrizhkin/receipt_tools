@@ -48,7 +48,7 @@ async def lifespan(app: FastAPI):
     worker.stop()
 
 
-app = FastAPI(title="price_hunter pipeline", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="receipt_tools pipeline", version="0.2.0", lifespan=lifespan)
 app.state.db = db
 app.state.cfg = cfg
 

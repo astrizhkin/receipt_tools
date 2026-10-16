@@ -1,16 +1,17 @@
-# price_hunter
+# Receipt Tools
 
 Receipt OCR pipeline + minimal Android capture app.
 
 Take a photo of a cash-register receipt on the phone → the pipeline resizes it,
-runs Qwen VL OCR (Markdown text + barcode/QR boxes + hOCR text blocks),
-converts the Markdown to structured JSON with a text LLM, and stores the
-receipt + line items in Postgres. Every step's input/output is saved for debug.
+runs Qwen VL OCR (whole document as Markdown), converts the Markdown to
+structured JSON with a text LLM (arithmetic-validated), and stores the
+receipt + line items + discounts in Postgres. Every step's input/output is
+saved for debug.
 
 ## Layout
 
 ```
-price_hunter/
+receipt_tools/
 ├── app/                 Flutter app source (mounted into the builder container)
 ├── pipeline/            LangGraph pipeline + FastAPI (own Docker image)
 │   ├── src/phunter/     package: api, graph, steps/, llm, artifacts, db, schemas

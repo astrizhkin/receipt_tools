@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "phunter"
 version = "0.1.0"
-description = "price_hunter receipt OCR pipeline (LangGraph)"
+description = "receipt_tools receipt OCR pipeline (LangGraph)"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",

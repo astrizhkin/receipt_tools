@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 source .env
 
-IMAGE=price-hunter-flutter-builder
+IMAGE=receipt-tools-flutter-builder
 docker build -t "$IMAGE" docker/flutter-builder
 
 # every build bumps the build number (the +N in "version: 1.0.0+N"): it becomes

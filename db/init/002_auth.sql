@@ -1,4 +1,4 @@
--- price_hunter auth + async requests (idempotent; also applied manually to
+-- receipt_tools auth + async requests (idempotent; also applied manually to
 -- existing volumes with: psql -f db/init/002_auth.sql)
 
 CREATE TABLE IF NOT EXISTS accounts (

@@ -8,7 +8,7 @@ source .env
 docker run --rm \
   -v "$PH_HOST_DIR/app":/src \
   -v ph_pub_cache:/root/.pub-cache \
-  price-hunter-flutter-builder \
+  receipt-tools-flutter-builder \
   flutter build web --no-web-resources-cdn
 
 echo "web build: app/build/web (compose 'web' service serves it on :8090)"

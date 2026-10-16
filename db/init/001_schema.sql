@@ -1,4 +1,4 @@
--- price_hunter receipt schema (applied on first postgres start)
+-- receipt_tools receipt schema (applied on first postgres start)
 
 CREATE TABLE IF NOT EXISTS receipts (
     id            BIGSERIAL PRIMARY KEY,
