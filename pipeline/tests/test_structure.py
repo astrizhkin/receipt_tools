@@ -72,3 +72,40 @@ def test_line_math_broken_rejected():
     res = _validate_candidate(json.dumps(cand, ensure_ascii=False))
     assert res["valid"] is False
     assert "972.00" in res["errors"]
+
+
+def test_run_structure_uses_yaml_prompts():
+    # regression: prod requests 26-29 died with NameError — the LLM call kept
+    # referencing the removed SYSTEM_PROMPT constant instead of the YAML prompt
+    from phunter.config import LLMEndpoint, PromptsConfig
+    from phunter.steps.structure import run_structure
+
+    class FakeClient:
+        def __init__(self):
+            self.system = None
+
+        def call_structured(self, system, user, adapter, **kw):
+            self.system = system
+            return adapter.validate_python(json.loads(_cand())), []
+
+    class FakeLog:
+        def write_input(self, text): pass
+        def append_raw(self, label, raw): pass
+        def write_output(self, obj): pass
+
+    prompts = PromptsConfig(
+        ocr_system="ocr-sys",
+        ocr_user="ocr-user",
+        structure_system="STRUCTURE-SYSTEM-FROM-YAML",
+        structure_user="ocr was: {ocr_text}",
+    )
+    client = FakeClient()
+    out = run_structure(
+        {"ocr": {"text": "RAW OCR TEXT"}},
+        LLMEndpoint(use_tools=True),
+        prompts,
+        client,
+        FakeLog(),
+    )
+    assert client.system == "STRUCTURE-SYSTEM-FROM-YAML"
+    assert out["structured"]["total"] == 1264.0

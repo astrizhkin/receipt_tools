@@ -137,7 +137,7 @@ def run_structure(
     tool_exec = {"validate_json": _validate_candidate} if cfg.use_tools else None
 
     result, raws = client.call_structured(
-        SYSTEM_PROMPT,
+        prompts.structure_system,
         user,
         STRUCTURED_ADAPTER,
         max_tokens=cfg.max_tokens,
